@@ -52,7 +52,7 @@ jobs:
             -e host ${{ secrets.HOST }} \
             -e database ${{ secrets.DATABASE }} \
             -e user ${{ secrets.USER }} \
-            -e password ${{ secrets.HEROKU_APP_NAME }}
+            -e password ${{ secrets.HEROKU_APP_NAME }} \
 
           # (Optional, default: "web")
           # Select the process type for which you want the docker container to be uploaded.
