@@ -1,3 +1,4 @@
+import sys
 from typing import Optional
 import configparser
 
@@ -6,11 +7,9 @@ import interactions
 from src.databasectl.postgres import PostgresQLDatabase
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
 
-cfg = configparser.ConfigParser()
-cfg.read('secret.cfg')
-token = cfg['server']['token']
-d = cfg['database']
-host, database, user, password = d['host'], d['database'], d['user'], d['password']
+token = sys.argv[1]
+print(token)
+host, database, user, password = sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 
 intents = interactions.Intents.DEFAULT \
           | interactions.Intents.GUILD_MESSAGES | interactions.Intents.GUILD_MEMBERS
