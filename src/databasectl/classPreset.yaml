@@ -1,0 +1,41 @@
+
+
+override:
+  school: NEU
+data:
+  - class_name: cs2500
+    full_name: fundamental of computer science
+    description: ""
+  - class_name: cs3500
+    full_name: ood
+    description: ""
+  - class_name: cs3000
+    full_name: algo
+    description: ""
+  - class_name: cs3200
+    full_name: databasectl
+    description: ""
+  - class_name: cs1200
+    full_name: intro
+    description: ""
+  - class_name: cs1210
+    full_name: coop
+    description: ""
+  - class_name: cs4100
+    full_name: data
+    description: ""
+  - class_name: cs4400
+    full_name: pl
+    description: ""
+  - class_name: cs4410
+    full_name: compiler
+    description: ""
+  - class_name: cs4540
+    full_name: soft
+    description: ""
+  - class_name: is1000
+    full_name: info
+    description: ""
+  - class_name: cs3800
+    full_name: theory
+    description: ""
