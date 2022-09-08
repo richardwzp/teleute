@@ -46,7 +46,12 @@ jobs:
 
           # (Optional, default: "")
           # Additional options of docker build command.
-          docker_options: "--no-cache --build-arg token=${{ secrets.TOKEN }} host=${{ secrets.HOST }} database=${{ secrets.DATABASE }} user=${{ secrets.USER }} password=${{ secrets.HEROKU_APP_NAME }} "
+          docker_options: --no-cache \
+                          --build-arg token=${{ secrets.TOKEN }} \
+                          --build-arg host=${{ secrets.HOST }} \
+                          --build-arg database=${{ secrets.DATABASE }} \
+                          --build-arg user=${{ secrets.USER }} \
+                          --build-arg password=${{ secrets.HEROKU_APP_NAME }}
 
 
           # (Optional, default: "web")
