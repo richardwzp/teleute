@@ -46,8 +46,7 @@ jobs:
 
           # (Optional, default: "")
           # Additional options of docker build command.
-          docker_options:
-            --no-cache \
+          docker_options: --no-cache \
             -e token=${{ secrets.TOKEN }} \
             -e host ${{ secrets.HOST }} \
             -e database ${{ secrets.DATABASE }} \
