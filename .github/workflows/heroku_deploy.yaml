@@ -46,7 +46,8 @@ jobs:
 
           # (Optional, default: "")
           # Additional options of docker build command.
-          docker_options:
+          docker_options: "--no-cache --build-arg token=${{ secrets.TOKEN }} host=${{ secrets.HOST }} database=${{ secrets.DATABASE }} user=${{ secrets.USER }} password=${{ secrets.HEROKU_APP_NAME }} "
+
 
           # (Optional, default: "web")
           # Select the process type for which you want the docker container to be uploaded.
