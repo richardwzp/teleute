@@ -46,7 +46,7 @@ jobs:
 
           # (Optional, default: "")
           # Additional options of docker build command.
-          docker_options: | 
+          docker_options:
             --no-cache \
             --build-arg  \
               token=${{ secrets.TOKEN }} \
