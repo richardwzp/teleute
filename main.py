@@ -61,7 +61,7 @@ async def on_ready():
     guilds = bot.guilds
     channels = {}
 
-    def get_all_channels():
+    async def get_all_channels():
         raw_channels = []
         for guild in guilds:
             raw_channels.extend(await guild.get_all_channels())
@@ -79,7 +79,7 @@ async def on_ready():
                 channel = await interactions.get(bot, interactions.Channel, object_id=channel_id)
                 if channel.guild_id is None:
                     print('channel has no guild_id, brute force to get a good channel obj')
-                    get_all_channels()
+                    await get_all_channels()
                     channel = channels[channel_id]
 
 
