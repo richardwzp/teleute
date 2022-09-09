@@ -7,10 +7,7 @@ from Config import get_server_id
 guild_id = get_server_id()
 
 
-class ProfCommand(interactions.Extension):
-    def __init__(self, client):
-        self.bot = client
-
+class _ProfCommand:
     @extension_command(name="hemann", description="""
     not great with names
     """, scope=guild_id)
@@ -101,6 +98,11 @@ class ProfCommand(interactions.Extension):
                        "and pushing deadlines benefits nobody. "
                        "It seems that being accommodating creates the expectation "
                        "of even more accommodation. Lesson learned.")
+
+
+class ProfCommand(_ProfCommand, interactions.Extension):
+    def __init__(self, client):
+        self.bot = client
 
 
 def setup(client):

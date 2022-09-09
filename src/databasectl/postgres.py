@@ -90,10 +90,13 @@ class PostgresCursor(AbstractContextManager):
         self.cursor = self.db.conn.cursor()
 
     def get_all(self, cls_name, args=None, **kwargs):
+        # TODO: while dict in python guarantee order, this is still bad practice
         arg = "*" if args is None else ", ".join(args)
+        condition = "" if len(kwargs) == 0 \
+            else f'WHERE {"AND ".join([f"{i.upper()}={self.substitute}" for i in kwargs])}'
         self.cursor.execute(
-            f'SELECT {arg} FROM {cls_name} '
-            f'WHERE {"AND ".join([f"{i.upper()}={self.substitute}" for i in kwargs])}',
+            f'SELECT {arg} FROM {cls_name} ' +
+            condition,
             tuple(kwargs.values())
         )
         return self.cursor.fetchall()

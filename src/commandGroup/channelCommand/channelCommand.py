@@ -18,7 +18,7 @@ gl_private_guild_id = get_server_id()
 default_emos = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
 
-class ChannelCommand(interactions.Extension):
+class _ChannelCommand:
     def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
         self.bot = client
         self.db = db
@@ -139,6 +139,11 @@ class ChannelCommand(interactions.Extension):
             json.dump(result, f)
 
         await ctx.send(f'stored')
+
+
+class ChannelCommand(_ChannelCommand, interactions.Extension):
+    def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
+        super().__init__(client, db, callback)
 
 
 def setup(client, db, cb_manager):
