@@ -11,7 +11,7 @@ cfg = configparser.ConfigParser()
 cfg.read('secret.cfg')
 d = cfg['database']
 token, host, database, user, password = cfg['server']['token'], d['host'], d['database'], d['user'], d['password']
-
+print(token, host, database, user, password)
 intents = interactions.Intents.DEFAULT \
           | interactions.Intents.GUILD_MESSAGES | interactions.Intents.GUILD_MEMBERS
 bot = interactions.Client(token=token, intents=intents)
