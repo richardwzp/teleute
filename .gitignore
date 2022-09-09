@@ -2,6 +2,7 @@
 # the secret including bot token
 secret.cfg
 /.idea
+database_populate.py
 
 # pycharm specific, don't touch
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider

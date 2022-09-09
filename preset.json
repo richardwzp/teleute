@@ -1,0 +1,202 @@
+[
+  {
+    "class_name": "CS1210",
+    "full_name": "professional development for khoury co-op",
+    "description": ""
+  },
+  {
+    "class_name": "CS1800",
+    "full_name": "discrete structure",
+    "description": ""
+  },
+  {
+    "class_name": "CS2500",
+    "full_name": "fundamental of computer science",
+    "description": ""
+  },
+  {
+    "class_name": "CS2510",
+    "full_name": "fundamental of computer science II",
+    "description": ""
+  },
+  {
+    "class_name": "CS2800",
+    "full_name": "logic and computation",
+    "description": ""
+  },
+  {
+    "class_name": "CS2810",
+    "full_name": "mathematics of data models",
+    "description": ""
+  },
+  {
+    "class_name": "CS3000",
+    "full_name": "algorithm and data",
+    "description": ""
+  },
+  {
+    "class_name": "CS3200",
+    "full_name": "database design",
+    "description": ""
+  },
+  {
+    "class_name": "CS3500",
+    "full_name": "object-oriented design",
+    "description": ""
+  },
+  {
+    "class_name": "CS3520",
+    "full_name": "programming in c++",
+    "description": ""
+  },
+  {
+    "full_name": "Game Programming",
+    "description": "",
+    "class_name": "CS3540"
+  },
+  {
+    "class_name": "CS3650",
+    "full_name": "computer systems",
+    "description": ""
+  },
+  {
+    "class_name": "CS3700",
+    "full_name": "network and distribution systems",
+    "description": ""
+  },
+  {
+    "class_name": "CS3800",
+    "full_name": "theory of computation",
+    "description": ""
+  },
+  {
+    "class_name": "CS4100",
+    "full_name": "foundation of artificial intelligence",
+    "description": ""
+  },
+  {
+    "full_name": "Computer Graphics",
+    "description": "",
+    "class_name": "CS4300"
+  },
+  {
+    "class_name": "CS4400",
+    "full_name": "programming language",
+    "description": ""
+  },
+  {
+    "class_name": "CS4410",
+    "full_name": "compiler",
+    "description": ""
+  },
+  {
+    "class_name": "CS4500",
+    "full_name": "software development",
+    "description": ""
+  },
+  {
+    "class_name": "CS4530",
+    "full_name": "fundamental of software engineering",
+    "description": ""
+  },
+  {
+    "class_name": "CS4550",
+    "full_name": "web development",
+    "description": ""
+  },
+  {
+    "class_name": "CS4810",
+    "full_name": "advanced algorithm",
+    "description": ""
+  },
+  {
+    "full_name": "Computer Systems",
+    "description": "",
+    "class_name": "CS5600"
+  },
+  {
+    "full_name": "Algorithms",
+    "description": "",
+    "class_name": "CS5800"
+  },
+  {
+    "class_name": "CY2550",
+    "full_name": "foundation of cybersecurity",
+    "description": ""
+  },
+  {
+    "full_name": "Systems Security",
+    "description": "",
+    "class_name": "CY3740"
+  },
+  {
+    "class_name": "CY4740",
+    "full_name": "network security",
+    "description": ""
+  },
+  {
+    "class_name": "DS2500",
+    "full_name": "intermediate programming with data",
+    "description": ""
+  },
+  {
+    "class_name": "DS3000",
+    "full_name": "foundation of data science",
+    "description": ""
+  },
+  {
+    "class_name": "DS4100",
+    "full_name": "data collection, integration, and analysis",
+    "description": ""
+  },
+  {
+    "class_name": "DS4400",
+    "full_name": "machine learning and data mining",
+    "description": ""
+  },
+  {
+    "class_name": "EECE2322",
+    "full_name": "Fundementals of Digital Design and Computer Organization",
+    "description": ""
+  },
+  {
+    "class_name": "MATH1365",
+    "full_name": "introduction of mathematical reasoning",
+    "description": ""
+  },
+  {
+    "class_name": "MATH2321",
+    "full_name": "multivariable calculus",
+    "description": ""
+  },
+  {
+    "class_name": "MATH2331",
+    "full_name": "linear algebra",
+    "description": ""
+  },
+  {
+    "class_name": "MATH3081",
+    "full_name": "probability and statistic",
+    "description": ""
+  },
+  {
+    "class_name": "MATH3545",
+    "full_name": "introduction to graph theory",
+    "description": ""
+  },
+  {
+    "class_name": "MATH4570",
+    "full_name": "Matrix Methods in Data Analysis and Machine Learning",
+    "description": ""
+  },
+  {
+    "class_name": "PHIL1145",
+    "full_name": "technology and human values",
+    "description": ""
+  },
+  {
+    "full_name": "The Eloquent Presenter",
+    "description": "",
+    "class_name": "THTR1170"
+  }
+]

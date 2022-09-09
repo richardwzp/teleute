@@ -1,6 +1,8 @@
 from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import Type
+
+import jaydebeapi
 from psycopg2._psycopg import connection, cursor
 
 import psycopg2
@@ -25,16 +27,39 @@ class PostgresQLDatabase(AbstractContextManager):
                  __traceback: TracebackType | None) -> bool | None:
         return self.conn.close()
 
-    def __init__(self, host, database, user, password, log=print):
-        self.conn: connection = psycopg2.connect(
-            host=host,
-            database=database,
-            user=user,
-            password=password)
+    def __init__(self, host, database, user, password, port=5432, lib_type='psycopg2', log=print):
         self.log = log
+        self.lib_type = lib_type
+        if lib_type == 'psycorpg2':
+            self.conn: connection = psycopg2.connect(
+                host=host,
+                database=database,
+                user=user,
+                port=port,
+                password=password)
+        elif lib_type == 'jdbc':
+            dsn_database = database
+            dsn_hostname = host
+            dsn_port = port
+            dsn_uid = user
+            dsn_pwd = password
+            jdbc_driver_name = "postgresql-42.4.0.jar"
+
+            connection_string = \
+                'jdbc:postgresql://' + \
+                dsn_hostname + ':' + \
+                str(dsn_port) + '/' + dsn_database
+
+            # self.log("Connection String: " + connection_string)
+            self.conn: connection = jaydebeapi.connect(
+                    "org.postgresql.Driver",
+                    connection_string,
+                    [dsn_uid, dsn_pwd],
+                    jdbc_driver_name)
+            self.conn.jconn.setAutoCommit(False)
 
     def get_instance(self):
-        return PostgresCursor(self)
+        return PostgresCursor(self, self.lib_type)
 
 
 class PostgresCursor(AbstractContextManager):
@@ -46,10 +71,18 @@ class PostgresCursor(AbstractContextManager):
 
         return self.cursor.close()
 
-    def __init__(self, db: PostgresQLDatabase, log=print):
+    def __init__(self, db: PostgresQLDatabase, lib_type, log=print):
         self.db = db
         self.cursor: cursor = self.db.conn.cursor()
         self.log = log
+        if lib_type == 'jdbc':
+            self.substitute = "?"
+        elif lib_type == 'psycopg2':
+            self.substitute = "%s"
+        else:
+            raise ValueError(f"does not recognize lib_type '{lib_type}'")
+
+
 
     def commit(self):
         self.db.conn.commit()
@@ -59,7 +92,7 @@ class PostgresCursor(AbstractContextManager):
     def get_all(self, cls_name, **kwargs):
         self.cursor.execute(
             f'SELECT * FROM {cls_name} '
-            f'WHERE {"AND ".join([f"{i.upper()}=%s" for i in kwargs])}',
+            f'WHERE {"AND ".join([f"{i.upper()}={self.substitute}" for i in kwargs])}',
             tuple(kwargs.values())
         )
         return self.cursor.fetchall()
@@ -81,7 +114,8 @@ class PostgresCursor(AbstractContextManager):
         :return: if adding the class succeeded
         """
         self.cursor.execute(
-            'INSERT INTO CLASS (CLASS_NAME, FULL_NAME, DESCRIPTION, SCHOOL) VALUES (%s, %s, %s, %s)',
+            f'INSERT INTO CLASS (CLASS_NAME, FULL_NAME, DESCRIPTION, SCHOOL) '
+            f'VALUES ({self.substitute}, {self.substitute}, {self.substitute}, {self.substitute})',
             (class_name.upper(), full_name, description, school.upper()))
 
     def add_menu_entry(self, entry_name, role_id, emoji, role_menu_id):
@@ -94,7 +128,8 @@ class PostgresCursor(AbstractContextManager):
         :return: the entry id
         """
         self.cursor.execute(
-            'INSERT INTO MENU_ENTRY (ENTRY_NAME, ROLE_ID, EMOJI, ROLE_MENU_ID) VALUES (%s, %s, %s, %s)',
+            'INSERT INTO MENU_ENTRY (ENTRY_NAME, ROLE_ID, EMOJI, ROLE_MENU_ID) '
+            f'VALUES ({self.substitute}, {self.substitute}, {self.substitute}, {self.substitute})',
             (entry_name, str(role_id), emoji, int(role_menu_id)))
         return self.get_all(
             "MENU_ENTRY",
@@ -111,7 +146,7 @@ class PostgresCursor(AbstractContextManager):
         :return: if the add succeeded
         """
         self.cursor.execute(
-            'INSERT INTO MENU_ENTRY_CLASS (ENTRY_ID, CLASS_NAME) VALUES (%s, %s)',
+            f'INSERT INTO MENU_ENTRY_CLASS (ENTRY_ID, CLASS_NAME) VALUES ({self.substitute}, {self.substitute})',
             (int(entry_id), class_name))
 
     def add_role_menu(self, message_id, menu_group_name, item_limit):
@@ -123,7 +158,8 @@ class PostgresCursor(AbstractContextManager):
         :return: if the add succeeded
         """
         self.cursor.execute(
-            'INSERT INTO ROLE_MENU (MESSAGE_ID, MENU_GROUP_NAME, item_limit) VALUES (%s, %s, %s)',
+            'INSERT INTO ROLE_MENU (MESSAGE_ID, MENU_GROUP_NAME, item_limit) '
+            f'VALUES ({self.substitute}, {self.substitute}, {self.substitute})',
             (str(message_id), menu_group_name, int(item_limit)))
 
         return self.get_all(
@@ -141,8 +177,10 @@ class PostgresCursor(AbstractContextManager):
         :param description: a descritpion of the menu group, default to empty string.
         :return: if the add succeeded
         """
+
         self.cursor.execute(
-            'INSERT INTO ROLE_MENU_GROUP (GROUP_NAME, CHANNEL_ID, MENU_TYPE, DESCRIPTION) VALUES (%s, %s, %s, %s)',
+            'INSERT INTO ROLE_MENU_GROUP (GROUP_NAME, CHANNEL_ID, MENU_TYPE, DESCRIPTION) '
+            f'VALUES ({self.substitute}, {self.substitute}, {self.substitute}, {self.substitute})',
             (group_name, str(channel_id), menu_type, description))
 
 

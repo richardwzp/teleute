@@ -21,6 +21,7 @@ class ClassMenu:
             description=None):
         with self.db.get_instance() as inst:
             inst.add_role_menu_group(menu_group_name, channel.id, menu_type, description=description)
+        print(f"created class menu group '{menu_group_name}'")
 
     @staticmethod
     def _generate_embed_base(title, description=None):
@@ -208,6 +209,7 @@ class ClassMenu:
             _, channel_id, _, _ = inst.get_all(
                 'ROLE_MENU_GROUP',
                 group_name=menu_name)[0]
+            print(f'menu "{menu_name}" exists, proceed with menu loading')
             channel = await interactions.get(self.bot, interactions.Channel, object_id=channel_id)
             guild = await interactions.get(self.bot, interactions.Guild, object_id=int(channel.guild_id))
             menus = inst.get_all(

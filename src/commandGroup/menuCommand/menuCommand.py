@@ -1,7 +1,9 @@
+import json
 from typing import Dict
 
 import interactions
 
+from src.channelManage.channelUtil import ChannelUtil
 from src.databasectl.dataRead import readPreset
 from src.databasectl.postgres import PostgresQLDatabase
 from src.menu.classMenu import ClassMenu
@@ -15,10 +17,41 @@ default_emos = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"
 
 
 class MenuCommand(interactions.Extension):
-    def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
+    def __init__(self, client: interactions.Client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
         self.bot = client
         self.db = db
         self.callback = callback
+
+
+    @interactions.extension_command(
+        name="populate_database_class",
+        description="populate the database with some preset classes, this should only be run once",
+        scope=gl_private_guild_id,
+        default_member_permissions=interactions.Permissions.ADMINISTRATOR,
+        # options=[
+        #     interactions.Option(
+        #         name="channel",
+        #         description="the channel name",
+        #         type=interactions.OptionType.CHANNEL,
+        #         required=True,
+        #     ),
+        # ],
+    )
+    async def populate_database_class(self, ctx: interactions.CommandContext):
+        await ctx.send("started database population")
+        with open('preset.json') as f:
+            data = json.loads(f.read())
+            for dic in data:
+                dic['school'] = "NEU"
+        with self.db.get_instance() as inst:
+            for val in data:
+                class_name, full_name, description, school = \
+                    val["class_name"], val["full_name"], val["description"], val["school"]
+                inst.add_class(class_name, full_name, description, school)
+                await ChannelUtil(ctx).createClass(class_name.upper())
+
+
+
 
     @interactions.extension_command(
         name="preset_class",
@@ -36,25 +69,36 @@ class MenuCommand(interactions.Extension):
     )
     async def preset_class(self, ctx: interactions.CommandContext):
         await ctx.send("started preset")
-        data = readPreset('databasectl/classPreset.yaml')
+        with open('preset.json') as f:
+            data = json.loads(f.read())
+            for dic in data:
+                dic['school'] = "NEU"
+
         guild = await ctx.get_guild()
         all_roles: Dict[str, interactions.Role] = {role.name: role for role in await guild.get_all_roles()}
 
-        names, full_names, roles, emojis = [], [], [], ['😄', '😀', '😃', '🥶', '😁', '😆', '😅',
-                                                        '😂', '🤣', '☺', '🥳', '🥰', '😍', '🥲', '😌', '😉', '🙃'][:12]
+        names, full_names, roles, emojis = [], [], [], default_emos
+        # ['😄', '😀', '😃', '🥶', '😁', '😆', '😅', '😂', '🤣', '☺', '🥳', '🥰', '😍', '🥲', '😌', '😉', '🙃'][:12]
         ta_roles = {}
         for val in data:
-            class_name, full_name, description, school = val.values()
+            class_name, full_name, description, school = \
+                val["class_name"], val["full_name"], val["description"], val["school"]
             class_name = class_name.upper()
             names.append(class_name)
             roles.append(all_roles[class_name])
             full_names.append(full_name)
             ta_roles[class_name] = all_roles[class_name + " TA"]
-
+        def get_emoji():
+            while True:
+                emo_iter = iter(emojis)
+                for emo in emo_iter:
+                    yield emo
+        emo_iter = iter(get_emoji())
+        emojis = [next(emo_iter) for _ in names]
         menu = ClassMenu(self.bot, self.db, ctx)
         # await menu.generate_menu_from_group('group1', await ctx.get_channel(), names, roles, emojis, item_limit=3)
         await menu.generate_menu_from_group(
-            'Fall 2022 classes', await ctx.get_channel(), names, roles, emojis, menu_type='class', item_limit=6)
+            'Fall 2022 classes', await ctx.get_channel(), names, roles, emojis, menu_type='class', item_limit=10)
 
     @interactions.extension_command(
         name="add_menu_entry",

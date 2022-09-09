@@ -4,11 +4,10 @@ import configparser
 
 import interactions
 
-from src.databasectl.postgres import PostgresQLDatabase
+from src.databasectl.postgres import PostgresQLDatabase, PostgresCursor
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
 
 token = sys.argv[1]
-print(token)
 host, database, user, password = sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 
 intents = interactions.Intents.DEFAULT \
@@ -44,7 +43,7 @@ async def on_ready():
 
 
 try:
-    db = PostgresQLDatabase(host, database, user, password)
+    db = PostgresQLDatabase(host, database, user, password, lib_type='jdbc')
     bot.load('src.commandGroup.menuCommand.menuCommand', db=db, cb_manager=callback_manager)
     bot.load('src.commandGroup.channelCommand.channelCommand', db=db, cb_manager=callback_manager)
     bot.load('src.commandGroup.classCommand.classCommand', db=db, cb_manager=callback_manager)
