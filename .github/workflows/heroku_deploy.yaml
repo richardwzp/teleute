@@ -51,7 +51,7 @@ jobs:
                           --build-arg host=${{ secrets.HOST }} 
                           --build-arg database=${{ secrets.DATABASE }} 
                           --build-arg user=${{ secrets.USER }} 
-                          --build-arg password=${{ secrets.HEROKU_APP_NAME }}
+                          --build-arg password=${{ secrets.PASSWORD }}
 
 
           # (Optional, default: "web")
