@@ -50,6 +50,7 @@ try:
     bot.load('src.commandGroup.channelCommand.channelCommand', db=db, cb_manager=callback_manager)
     bot.load('src.commandGroup.classCommand.classCommand', db=db, cb_manager=callback_manager)
     bot.load('src.commandGroup.profCommand.profCommand')
+    bot.load('src.commandGroup.miscCommand.miscCommand')
     bot.start()
 except Exception as e:
     print(str(e))
