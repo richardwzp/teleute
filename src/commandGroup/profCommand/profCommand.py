@@ -65,7 +65,7 @@ class ProfCommand(interactions.Extension):
             'And there’s absolutely no way for us to know that in advance of grading the exam!')
 
     @extension_command(name="shiver", description="""
-    shiver makes u shiver
+    shiver makes u shiver?
     """, scope=guild_id)
     async def _shiver(self, ctx):
         await ctx.send('Who should I thank? My so-called "colleagues," '
@@ -93,7 +93,7 @@ class ProfCommand(interactions.Extension):
         description="""
     hw over thanksgiving?
     """, scope=guild_id)
-    async def _shiver(self, ctx):
+    async def _shesh(self, ctx):
         await ctx.send("I struggle to think of even one situation "
                        "where a company would move a release deadline because of the personal, "
                        "optional travel plans of its engineers. "
