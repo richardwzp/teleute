@@ -7,7 +7,7 @@ from Config import get_server_id
 guild_id = get_server_id()
 
 
-class MiscCommand(interactions.Extension):
+class _MiscCommand:
     def __init__(self, client):
         self.bot = client
 
@@ -16,6 +16,11 @@ class MiscCommand(interactions.Extension):
     """, scope=guild_id)
     async def algo(self, ctx: interactions.CommandContext):
         await ctx.send('https://discord.gg/eteUMkvYtG')
+
+
+class MiscCommand(_MiscCommand, interactions.Extension):
+    def __init__(self, client):
+        super().__init__(client)
 
 
 def setup(client):

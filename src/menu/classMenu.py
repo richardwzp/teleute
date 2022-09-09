@@ -204,21 +204,26 @@ class ClassMenu:
             self,
             menu_name: str,
             log_channel: interactions.Channel,
+            guild_id,
             callbackManager: ReactionCallbackManager):
         with self.db.get_instance() as inst:
             if not inst.menu_group_exists(menu_name):
                 raise ValueError(f"menu group {menu_name} does not exist yet, consider creating it instead of loading")
-            _, _, _, channel_id = inst.get_all(
+            _, channel_id, _, _ = inst.get_all(
                 'ROLE_MENU_GROUP',
+                args=['group_name', 'channel_id', 'menu_type', 'description'],
                 group_name=menu_name)[0]
             print(f'menu "{menu_name}" exists, proceed with menu loading')
-            channel = await interactions.get(self.bot, interactions.Channel, object_id=channel_id)
+            print(f"fetching channel '{channel_id}', guild '{guild_id}'")
+            channel = await interactions.get(self.bot, interactions.Channel, object_id=int(channel_id))
             guild = await interactions.get(self.bot, interactions.Guild, object_id=int(channel.guild_id))
             menus = inst.get_all(
                 'ROLE_MENU',
                 menu_group_name=menu_name
             )
+            print(f'starting load, sending a message to log channel for emoji...')
             emoji_msg = await log_channel.send("testing emojis ...")
+            print(f'message sent, now go forward')
             bot_id = self.bot.me.id
             for menu_id, msg_id, _, _ in menus:
                 msg = await channel.get_message(msg_id)
@@ -238,7 +243,7 @@ class ClassMenu:
                             print(f"detected, adding role {role_id}")
                             # user = await interactions.get(self.bot, interactions.User, object_id=int(
                             # reaction.user_id))
-                            await reaction.member.add_role(role_id, self.ctx.guild_id, reason="on react add")
+                            await reaction.member.add_role(role_id, guild_id, reason="on react add")
 
                         return func
 
@@ -252,8 +257,11 @@ class ClassMenu:
                                     await interactions.get(self.bot, interactions.Guild,
                                                            object_id=int(reaction.guild_id))
                                 member = await guild.get_member(reaction.user_id)
-                                await member.remove_role(role_id, self.ctx.guild_id, reason="on react remove")
-                            except Exception:
+                                await member.remove_role(role_id, guild_id, reason="on react remove")
+                            except Exception as e:
+                                print("member removed reaction from role menu, rare occurrence, "
+                                      "this is not a cause for concern, read the error message to determine")
+                                print(str(e))
                                 print(f"member removed emoji {reaction.emoji}, "
                                       f"however does not have the role")
 

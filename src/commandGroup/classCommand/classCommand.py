@@ -12,7 +12,7 @@ gl_private_guild_id = get_server_id()
 default_emos = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
 
-class ClassCommand(interactions.Extension):
+class _ClassCommand:
     def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
         self.bot = client
         self.db = db
@@ -96,6 +96,11 @@ class ClassCommand(interactions.Extension):
                 await role.delete(guild.id, reason="mass deleting roles through role delete command")
                 await roleMsg.send()
         await ctx.send("all role deletion finished")
+
+
+class ClassCommand(_ClassCommand, interactions.Extension):
+    def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
+        super().__init__(client, db, callback)
 
 
 def setup(client, db, cb_manager):
