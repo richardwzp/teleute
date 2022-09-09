@@ -257,8 +257,11 @@ class ClassMenu:
                                     await interactions.get(self.bot, interactions.Guild,
                                                            object_id=int(reaction.guild_id))
                                 member = await guild.get_member(reaction.user_id)
-                                await member.remove_role(role_id, self.ctx.guild_id, reason="on react remove")
-                            except Exception:
+                                await member.remove_role(role_id, guild_id, reason="on react remove")
+                            except Exception as e:
+                                print("member removed reaction from role menu, rare occurrence, "
+                                      "this is not a cause for concern, read the error message to determine")
+                                print(str(e))
                                 print(f"member removed emoji {reaction.emoji}, "
                                       f"however does not have the role")
 
