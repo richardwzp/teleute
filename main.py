@@ -8,7 +8,13 @@ from src.databasectl.postgres import PostgresQLDatabase, PostgresCursor
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
 
 token = sys.argv[1]
-host, database, user, password = sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+
+try:
+    host, database, user, password = sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+except Exception as e:
+    msg = f"argv: '{sys.argv}'"
+    raise ValueError(msg)
+
 
 intents = interactions.Intents.DEFAULT \
           | interactions.Intents.GUILD_MESSAGES | interactions.Intents.GUILD_MEMBERS
