@@ -27,6 +27,7 @@ COPY ./requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 COPY ./src/ ./src/
+COPY ./entrypoint.sh .
 COPY ./postgresql-42.4.0.jar .
 COPY ./preset.json .
 
@@ -34,5 +35,5 @@ COPY Config.py .
 COPY main.py .
 COPY server_setting.json .
 
-ENTRYPOINT python main.py ${token} ${host} ${database} ${user} ${password}
+ENTRYPOINT ./entrypoint.sh
 
