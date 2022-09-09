@@ -89,9 +89,10 @@ class PostgresCursor(AbstractContextManager):
         self.cursor.close()
         self.cursor = self.db.conn.cursor()
 
-    def get_all(self, cls_name, **kwargs):
+    def get_all(self, cls_name, args=None, **kwargs):
+        arg = "*" if args is None else ", ".join(args)
         self.cursor.execute(
-            f'SELECT * FROM {cls_name} '
+            f'SELECT {arg} FROM {cls_name} '
             f'WHERE {"AND ".join([f"{i.upper()}={self.substitute}" for i in kwargs])}',
             tuple(kwargs.values())
         )

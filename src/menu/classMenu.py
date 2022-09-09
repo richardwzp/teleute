@@ -176,9 +176,11 @@ class ClassMenu:
             raise ValueError(f"expected all item to have size less than or equal to {item_limit}, "
                              f"however got size {len(contents[0])}")
         # generate the menu msg
-        menu_group = inst.get_all('ROLE_MENU_GROUP', group_name=menu_group_name)[0]
-        _, channel_id, menu_type, description = menu_group
-        channel = await interactions.get(self.bot, interactions.Channel, object_id=channel_id)
+        menu_group = inst.get_all('ROLE_MENU_GROUP', args=['group_name', 'menu_type', 'description', 'channel_id'],
+                                  group_name=menu_group_name)[0]
+        _, menu_type, description, channel_id = menu_group
+        print(f'getting channel with id "{channel_id}"')
+        channel = await interactions.get(self.bot, interactions.Channel, object_id=int(channel_id))
         msg = await channel.send("building...")
         embed_name = menu_group_name if index is None else menu_group_name + f": part {index}"
         menu_embed = self._generate_embed_base(embed_name, description=description)

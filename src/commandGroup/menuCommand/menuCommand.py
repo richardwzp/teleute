@@ -10,7 +10,7 @@ from src.menu.classMenu import ClassMenu
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
 from src.util.decorateString import MutableMessage
 
-from Config import get_server_id
+from Config import get_server_id, PRESET_PATH
 
 gl_private_guild_id = get_server_id()
 default_emos = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
@@ -54,7 +54,7 @@ class MenuCommand(interactions.Extension):
 
 
     @interactions.extension_command(
-        name="preset_class",
+        name="create_preset_class",
         description="create resource for all preset classes",
         scope=gl_private_guild_id,
         default_member_permissions=interactions.Permissions.ADMINISTRATOR,
@@ -67,19 +67,21 @@ class MenuCommand(interactions.Extension):
         #     ),
         # ],
     )
-    async def preset_class(self, ctx: interactions.CommandContext):
+    async def create_preset_class(self, ctx: interactions.CommandContext):
         await ctx.send("started preset")
-        with open('preset.json') as f:
+        print('start successfully')
+        with open(PRESET_PATH) as f:
             data = json.loads(f.read())
             for dic in data:
                 dic['school'] = "NEU"
-
+        print('opened successfully')
         guild = await ctx.get_guild()
         all_roles: Dict[str, interactions.Role] = {role.name: role for role in await guild.get_all_roles()}
 
         names, full_names, roles, emojis = [], [], [], default_emos
         # ['😄', '😀', '😃', '🥶', '😁', '😆', '😅', '😂', '🤣', '☺', '🥳', '🥰', '😍', '🥲', '😌', '😉', '🙃'][:12]
         ta_roles = {}
+        print('start menu generation')
         for val in data:
             class_name, full_name, description, school = \
                 val["class_name"], val["full_name"], val["description"], val["school"]

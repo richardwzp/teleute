@@ -4,7 +4,7 @@ from pprint import pprint
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SERVER_SETTING_PATH = os.path.join(ROOT_DIR, 'server_setting.json')
-
+PRESET_PATH = os.path.join(ROOT_DIR, 'preset.json')
 
 def get_server_id():
     with open(SERVER_SETTING_PATH) as f:
