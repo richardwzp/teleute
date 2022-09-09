@@ -7,14 +7,10 @@ import interactions
 from src.databasectl.postgres import PostgresQLDatabase, PostgresCursor
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
 
-token = sys.argv[1]
-
-try:
-    host, database, user, password = sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
-except Exception as e:
-    msg = f"argv: '{sys.argv}'"
-    raise ValueError(msg)
-
+cfg = configparser.ConfigParser()
+cfg.read('secret.cfg')
+d = cfg['database']
+token, host, database, user, password = cfg['server']['token'], d['host'], d['database'], d['user'], d['password']
 
 intents = interactions.Intents.DEFAULT \
           | interactions.Intents.GUILD_MESSAGES | interactions.Intents.GUILD_MEMBERS

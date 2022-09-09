@@ -35,5 +35,8 @@ COPY Config.py .
 COPY main.py .
 COPY server_setting.json .
 
+# generate the secret config
+RUN echo "[server]\n token= ${token}\n[database]\n host = ${host}\n database = ${database}\n user = ${user}\n password = ${password}">secret.cfg
+
 ENTRYPOINT ./entrypoint.sh
 
