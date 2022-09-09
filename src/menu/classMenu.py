@@ -208,7 +208,7 @@ class ClassMenu:
         with self.db.get_instance() as inst:
             if not inst.menu_group_exists(menu_name):
                 raise ValueError(f"menu group {menu_name} does not exist yet, consider creating it instead of loading")
-            _, channel_id, _, _ = inst.get_all(
+            _, _, _, channel_id = inst.get_all(
                 'ROLE_MENU_GROUP',
                 group_name=menu_name)[0]
             print(f'menu "{menu_name}" exists, proceed with menu loading')

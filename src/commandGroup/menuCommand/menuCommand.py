@@ -146,7 +146,7 @@ class MenuCommand(interactions.Extension):
         await msgBuilder.ctxMsg.delete()
 
     @interactions.extension_command(
-        name="load_menu",
+        name="loading_menu",
         description="load the menu",
         scope=gl_private_guild_id,
         default_member_permissions=interactions.Permissions.ADMINISTRATOR,
@@ -159,7 +159,7 @@ class MenuCommand(interactions.Extension):
             ),
         ],
     )
-    async def load_menu(self, ctx: interactions.CommandContext, menu_name, no_trace=False):
+    async def loading_menu(self, ctx: interactions.CommandContext, menu_name, no_trace=False):
         msg1 = await ctx.send("staring menu loading...")
         await ClassMenu(self.bot, self.db, ctx).load_menu(menu_name, await ctx.get_channel(), self.callback)
         msg2 = await ctx.send("done")
