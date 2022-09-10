@@ -7,6 +7,7 @@ def get_all_menu(inst: PostgresCursor):
         args=['group_name',
               'channel_id',
               'menu_type',
-              'description'])
+              'description',
+              'guild_id'])
     return menus
 
