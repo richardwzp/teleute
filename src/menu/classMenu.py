@@ -20,7 +20,7 @@ class ClassMenu:
             menu_type="generic",
             description=None):
         with self.db.get_instance() as inst:
-            inst.add_role_menu_group(menu_group_name, channel.id, menu_type, description=description)
+            inst.add_role_menu_group(menu_group_name, channel.id, menu_type, channel.guild_id, description=description)
         print(f"created class menu group '{menu_group_name}'")
 
     @staticmethod
@@ -48,7 +48,7 @@ class ClassMenu:
             emoji: interactions.Emoji,
             role: interactions.Role,
             inst: PostgresCursor):
-        result = inst.get_all('CLASS', class_name=cls_name)
+        result = inst.get_all('CLASS', args=['class_name', 'full_name'], class_name=cls_name)
         full_name = result[0][1]
         embed.add_field(name=f"`{cls_name + ' (' + full_name + ')'}`",
                         value=f"{emoji} {' - ' * 45} {role.mention}"
@@ -125,13 +125,22 @@ class ClassMenu:
         with self.db.get_instance() as inst:
             if not inst.menu_group_exists(menu_name):
                 raise ValueError(f"given menu group '{menu_name}' does not exist")
-            menu_group = inst.get_all('ROLE_MENU_GROUP', group_name=menu_name)[0]
-            _, channel_id, menu_type, description = menu_group
-            menus = inst.get_all('ROLE_MENU', menu_group_name=menu_name)
+            menu_group = inst.get_all(
+                'ROLE_MENU_GROUP',
+                args=['group_name', 'channel_id', 'menu_type', 'description', 'guild_id'],
+                group_name=menu_name)[0]
+            _, channel_id, menu_type, _, description = menu_group
+            menus = inst.get_all(
+                'ROLE_MENU',
+                args=['role_menu_id', 'message_id', 'menu_group_name', 'item_limit'],
+                menu_group_name=menu_name)
             available_menu = None
             for menu in menus:
                 menu_serial_id, msg_id, menu_group_name, item_limit = menu
-                entries = inst.get_all('MENU_ENTRY', role_menu_id=menu_serial_id)
+                entries = inst.get_all(
+                    'MENU_ENTRY',
+                    args=['entry_id'],
+                    role_menu_id=menu_serial_id)
                 if len(entries) < item_limit:
                     available_menu = menu
                     break
@@ -176,7 +185,8 @@ class ClassMenu:
             raise ValueError(f"expected all item to have size less than or equal to {item_limit}, "
                              f"however got size {len(contents[0])}")
         # generate the menu msg
-        menu_group = inst.get_all('ROLE_MENU_GROUP', args=['group_name', 'menu_type', 'description', 'channel_id'],
+        menu_group = inst.get_all('ROLE_MENU_GROUP',
+                                  args=['group_name', 'menu_type', 'description', 'channel_id'],
                                   group_name=menu_group_name)[0]
         _, menu_type, description, channel_id = menu_group
         print(f'getting channel with id "{channel_id}"')
@@ -219,18 +229,22 @@ class ClassMenu:
             guild = await interactions.get(self.bot, interactions.Guild, object_id=int(channel.guild_id))
             menus = inst.get_all(
                 'ROLE_MENU',
+                args=['role_menu_id', 'message_id'],
                 menu_group_name=menu_name
             )
             print(f'starting load, sending a message to log channel for emoji...')
             emoji_msg = await log_channel.send("testing emojis ...")
             print(f'message sent, now go forward')
             bot_id = self.bot.me.id
-            for menu_id, msg_id, _, _ in menus:
+            for menu_id, msg_id in menus:
                 msg = await channel.get_message(msg_id)
-                entries = inst.get_all('MENU_ENTRY', role_menu_id=menu_id)
+                entries = inst.get_all(
+                    'MENU_ENTRY',
+                    args=['entry_name', 'role_id', 'emoji'],
+                    role_menu_id=menu_id)
                 # ensure we are reacting in order
                 entries.sort(key=lambda x: x[0])
-                for _, entry_name, role_id, emoji, _ in entries:
+                for entry_name, role_id, emoji in entries:
                     # emoji resolution
                     emoji: interactions.Emoji = \
                         await create_managed_emote(emoji, guild, log_channel, existing_msg=emoji_msg)
