@@ -64,7 +64,7 @@ async def on_ready():
             print(f"fetching channel '{channel_id}'")
             channel = await interactions.get(bot, interactions.Channel, object_id=channel_id)
             # TODO: ctx is not needed here. This is a hack, ClassMenu should not depend on context
-            await ClassMenu(bot, db, None).load_menu(group_name, channel, guild_id, callback_manager)
+            await ClassMenu(bot, db, None).load_menu(group_name, channel, int(guild_id), callback_manager)
 
 
 try:
