@@ -58,33 +58,13 @@ async def on_ready():
     s = deploy_status
     print(f"-- sandman is ready ---")
     print(f"--       {s}        ---")
-    guilds = bot.guilds
-    channels = {}
-
-    async def get_all_channels():
-        raw_channels = []
-        for guild in guilds:
-            raw_channels.extend(await guild.get_all_channels())
-
-        for channel in raw_channels:
-            channels[channel.id] = channel
-
     with db.get_instance() as inst:
         menu_groups = get_all_menu(inst)
-        for group_name, channel_id, menu_type, description in menu_groups:
+        for group_name, channel_id, menu_type, description, guild_id in menu_groups:
             print(f"fetching channel '{channel_id}'")
-            if len(channels) > 0:
-                channel = channels[channel_id]
-            else:
-                channel = await interactions.get(bot, interactions.Channel, object_id=channel_id)
-                if channel.guild_id is None:
-                    print('channel has no guild_id, brute force to get a good channel obj')
-                    await get_all_channels()
-                    channel = channels[channel_id]
-
-
+            channel = await interactions.get(bot, interactions.Channel, object_id=channel_id)
             # TODO: ctx is not needed here. This is a hack, ClassMenu should not depend on context
-            await ClassMenu(bot, db, None).load_menu(group_name, channel, channel.guild_id, callback_manager)
+            await ClassMenu(bot, db, None).load_menu(group_name, channel, guild_id, callback_manager)
 
 
 try:
