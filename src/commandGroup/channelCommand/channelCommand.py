@@ -68,7 +68,11 @@ class _ChannelCommand:
                     to_be_deleted_roles.extend(await roleManager.getRole(category_model.name + " TA"))
                     category_msgs[category_model.id].add_text(f"- deleted {len(to_be_deleted_roles)} role\n")
                     for role in to_be_deleted_roles:
-                        await role.delete(guild.id, "role deleted as part of clear all")
+                        try:
+                            await role.delete(guild.id, "role deleted as part of clear all")
+                        except Exception as e:
+                            print(str(e))
+                            print(f'role {role.name} could not be deleted')
 
                 deleteMsg = category_msgs[category_model.id]
                 channels = category[category_model.id]

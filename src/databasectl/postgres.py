@@ -172,20 +172,21 @@ class PostgresCursor(AbstractContextManager):
             menu_group_name=menu_group_name,
             item_limit=item_limit)[0][0]
 
-    def add_role_menu_group(self, group_name, channel_id, menu_type, description=""):
+    def add_role_menu_group(self, group_name, channel_id, menu_type, guild_id, description=""):
         """
         add a role menu group, this is not committed immediately.
         :param group_name: the name of the menu group
         :param channel_id: the id of the channel this role menu is in.
         :param menu_type: the type of the menu. It's either CLASS or GENERIC.
-        :param description: a descritpion of the menu group, default to empty string.
+        :param guild_id: the id of the guild this role menu is in.
+        :param description: a description of the menu group, default to empty string.
         :return: if the add succeeded
         """
 
         self.cursor.execute(
-            'INSERT INTO ROLE_MENU_GROUP (GROUP_NAME, CHANNEL_ID, MENU_TYPE, DESCRIPTION) '
-            f'VALUES ({self.substitute}, {self.substitute}, {self.substitute}, {self.substitute})',
-            (group_name, str(channel_id), menu_type, description))
+            'INSERT INTO ROLE_MENU_GROUP (GROUP_NAME, CHANNEL_ID, MENU_TYPE, DESCRIPTION, GUILD_ID) '
+            f'VALUES ({self.substitute}, {self.substitute}, {self.substitute}, {self.substitute}, {self.substitute})',
+            (group_name, str(channel_id), menu_type, description, str(guild_id)))
 
 
 
