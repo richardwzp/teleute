@@ -67,7 +67,6 @@ async def on_ready():
             await ClassMenu(bot, db, None).load_menu(group_name, channel, int(guild_id), callback_manager)
 
 
-
 try:
     db = PostgresQLDatabase(host, database, user, password, lib_type='jdbc')
     bot.load('src.commandGroup.menuCommand.menuCommand', db=db, cb_manager=callback_manager)
