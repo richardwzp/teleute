@@ -140,7 +140,8 @@ class _MenuCommand:
         await menu.add_menu_entry(menu_name, name, emoji, role)
         await msgBuilder.add_text("+ adding finished\n").send()
         await msgBuilder.add_text("reloading all reactions...\n").send()
-        await self.load_menu(ctx, menu_name, no_trace=True)
+        await ClassMenu(self.bot, self.db, ctx).\
+            load_menu(menu_name, await ctx.get_channel(), ctx.guild_id, self.callback)
         await msgBuilder.ctxMsg.delete()
 
     @interactions.extension_command(
