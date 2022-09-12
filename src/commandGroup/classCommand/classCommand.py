@@ -18,20 +18,6 @@ class _ClassCommand:
         self.db = db
         self.callback = callback
 
-    @interactions.extension_command(
-        name="create_class_resource",
-        description="create a category, related channels, and related roles",
-        scope=gl_private_guild_id,
-        default_member_permissions=interactions.Permissions.ADMINISTRATOR,
-        options=[
-            interactions.Option(
-                name="class_name",
-                description="the class name formatted like CS2500",
-                type=interactions.OptionType.STRING,
-                required=True,
-            ),
-        ],
-    )
     async def create_class_resource(self, ctx: interactions.CommandContext, class_name: str):
         await ChannelUtil(ctx).createClass(class_name.upper())
         # await ctx.send(f"all creation done for class '{class_name.upper()}'")
