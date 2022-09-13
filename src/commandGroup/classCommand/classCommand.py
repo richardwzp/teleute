@@ -58,8 +58,10 @@ class _ClassCommand:
         with self.db.get_instance() as inst:
             inst.add_class(class_name, full_name, description, school)
 
-        await MutableMessage(ctx, initial_message="+ created class successfully."). \
-            surround_default_codeBlock(lang="diff").send()
+        msg = MutableMessage(ctx, initial_message="+ created class successfully."). \
+            surround_default_codeBlock(lang="diff")
+        await msg.send()
+
         await self.create_class_resource(ctx, class_name)
 
     @interactions.extension_command(

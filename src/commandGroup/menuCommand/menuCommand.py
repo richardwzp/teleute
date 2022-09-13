@@ -133,16 +133,16 @@ class _MenuCommand:
         ],
     )
     async def add_menu_entry(self, ctx: interactions.CommandContext, menu_name, name, emoji, role: interactions.Role):
-        msgBuilder = MutableMessage(
-            ctx, initial_message="adding menu entries...\n").surround_default_codeBlock(lang="diff")
-        await msgBuilder.send()
-        menu = ClassMenu(self.bot, self.db, ctx)
-        await menu.add_menu_entry(menu_name, name, emoji, role)
-        await msgBuilder.add_text("+ adding finished\n").send()
-        await msgBuilder.add_text("reloading all reactions...\n").send()
-        await ClassMenu(self.bot, self.db, ctx).\
-            load_menu(menu_name, await ctx.get_channel(), ctx.guild_id, self.callback)
-        await msgBuilder.ctxMsg.delete()
+        with self.db.get_instance() as inst:
+            msgBuilder = MutableMessage(
+                ctx, initial_message="adding menu entries...\n").surround_default_codeBlock(lang="diff")
+            await msgBuilder.send()
+            menu = ClassMenu(self.bot, self.db, ctx)
+            await menu.add_menu_entry(inst, menu_name, name, emoji, role, self.callback)
+            await msgBuilder.add_text("+ adding finished\n").send()
+            await msgBuilder.add_text("reloading all reactions...\n").send()
+            await menu.load_class(inst, name, self.callback)
+            await msgBuilder.ctxMsg.delete()
 
     @interactions.extension_command(
         name="loading_menu",
