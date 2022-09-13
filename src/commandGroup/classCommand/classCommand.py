@@ -85,6 +85,25 @@ class _ClassCommand:
                 await roleMsg.send()
         await ctx.send("all role deletion finished")
 
+    @interactions.extension_command(
+        name="classmate_count",
+        description="count how many classmates are taking the current class",
+        scope=gl_private_guild_id,
+        options=[
+            interactions.Option(
+                name="role",
+                description="the role associated with the class",
+                type=interactions.OptionType.ROLE,
+                required=True,
+            )
+        ]
+    )
+    async def classmate_count(self, ctx: interactions.CommandContext, role: interactions.Role):
+        if not re.match(r"^[a-zA-Z]+\d{4}$", role.name):
+            return await ctx.send("given role is not a class")
+        guild: interactions.Guild = await ctx.get_guild()
+        members = [0 for mem in await guild.get_all_members() if role.id in mem.roles]
+        return await ctx.send(f"class `{role.name}` has {len(members)} people")
 
 class ClassCommand(_ClassCommand, interactions.Extension):
     def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
