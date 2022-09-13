@@ -121,52 +121,54 @@ class ClassMenu:
             index=index
         )
 
-    async def add_menu_entry(self, menu_name, name: str, emoji, role: interactions.Role):
-        with self.db.get_instance() as inst:
-            if not inst.menu_group_exists(menu_name):
-                raise ValueError(f"given menu group '{menu_name}' does not exist")
-            menu_group = inst.get_all(
-                'ROLE_MENU_GROUP',
-                args=['group_name', 'channel_id', 'menu_type', 'description', 'guild_id'],
-                group_name=menu_name)[0]
-            _, channel_id, menu_type, _, description = menu_group
-            menus = inst.get_all(
-                'ROLE_MENU',
-                args=['role_menu_id', 'message_id', 'menu_group_name', 'item_limit'],
-                menu_group_name=menu_name)
-            available_menu = None
-            for menu in menus:
-                menu_serial_id, msg_id, menu_group_name, item_limit = menu
-                entries = inst.get_all(
-                    'MENU_ENTRY',
-                    args=['entry_id'],
-                    role_menu_id=menu_serial_id)
-                if len(entries) < item_limit:
-                    available_menu = menu
-                    break
+    async def add_menu_entry(self, inst, menu_name, name: str, emoji, role: interactions.Role, call_back_manager):
+        if not inst.menu_group_exists(menu_name):
+            raise ValueError(f"given menu group '{menu_name}' does not exist")
+        menu_group = inst.get_all(
+            'ROLE_MENU_GROUP',
+            args=['group_name', 'channel_id', 'menu_type', 'description', 'guild_id'],
+            group_name=menu_name)[0]
+        _, channel_id, menu_type, _, description = menu_group
+        menus = inst.get_all(
+            'ROLE_MENU',
+            args=['role_menu_id', 'message_id', 'menu_group_name', 'item_limit'],
+            menu_group_name=menu_name)
+        available_menu = None
+        item_limit = None
+        for menu in menus:
+            menu_serial_id, msg_id, menu_group_name, item_limit = menu
+            entries = inst.get_all(
+                'MENU_ENTRY',
+                args=['entry_id'],
+                role_menu_id=menu_serial_id)
+            if len(entries) < item_limit:
+                available_menu = menu
+                break
 
-            if available_menu is None:
-                # no menu available, create one
-                menu_msg = \
-                    await self.generate_menu(
-                        menu_name,
-                        [name], [role], [emoji],
-                        inst,
-                        menu_type=menu_type,
-                        item_limit=item_limit,
-                        index=len(menus) + 1)
-                # menu_msg.crea
-            else:
-                inst.add_menu_entry(name, role.id, emoji, available_menu[0])
-                channel = await interactions.get(self.bot, interactions.Channel, object_id=channel_id)
-                msg = await channel.get_message(menu[1])
-                embed = msg.embeds[0]
-                if menu_type.lower() == 'generic':
-                    self._add_generate_menu_item(embed, name, emoji, role)
-                elif menu_type.lower() == "class":
-                    self._add_generate_class_menu_item(embed, name, emoji, role, inst)
-                await msg.edit(embeds=embed)
-                # await msg.create_reaction(emoji)
+        if available_menu is None:
+            # if there's no previous menu, it defaults to 10
+            item_limit = item_limit if item_limit is not None else 10
+            # no menu available, create one
+            menu_msg = \
+                await self.generate_menu(
+                    menu_name,
+                    [name], [role], [emoji],
+                    inst,
+                    menu_type=menu_type,
+                    item_limit=item_limit,
+                    index=len(menus) + 1)
+            # menu_msg.crea
+        else:
+            inst.add_menu_entry(name, role.id, emoji, available_menu[0])
+            channel = await interactions.get(self.bot, interactions.Channel, object_id=channel_id)
+            msg = await channel.get_message(available_menu[1])
+            embed = msg.embeds[0]
+            if menu_type.lower() == 'generic':
+                self._add_generate_menu_item(embed, name, emoji, role)
+            elif menu_type.lower() == "class":
+                self._add_generate_class_menu_item(embed, name, emoji, role, inst)
+            await msg.edit(embeds=embed)
+            menu_msg = msg
 
     async def _generate_menu(
             self,
@@ -210,6 +212,73 @@ class ClassMenu:
         await msg.edit("", embeds=menu_embed)
         return msg
 
+    def _create_add_remove_callback(self, guild_id, role_id):
+        bot_id = self.bot.me.id
+        guild_id = int(guild_id)
+        def add_role(role_id):
+            async def func(reaction: interactions.MessageReaction):
+                if reaction.user_id == bot_id:
+                    return
+                print(f"detected, adding role {role_id}")
+                # user = await interactions.get(self.bot, interactions.User, object_id=int(
+                # reaction.user_id))
+                await reaction.member.add_role(role_id, guild_id, reason="on react add")
+
+            return func
+
+        def remove_role(role_id):
+            async def func(reaction: interactions.MessageReaction):
+                if reaction.user_id == bot_id:
+                    return
+                print(f"detected, removing role {role_id}")
+                try:
+                    guild: interactions.Guild = \
+                        await interactions.get(self.bot, interactions.Guild,
+                                               object_id=int(reaction.guild_id))
+                    member = await guild.get_member(reaction.user_id)
+                    await member.remove_role(role_id, guild_id, reason="on react remove")
+                except Exception as e:
+                    print("member removed reaction from role menu, rare occurrence, "
+                          "this is not a cause for concern, read the error message to determine")
+                    print(str(e))
+                    print(f"member removed emoji {reaction.emoji}, "
+                          f"however does not have the role")
+
+            return func
+
+        return add_role(role_id), remove_role(role_id)
+
+    async def load_class(
+            self,
+            inst: PostgresCursor,
+            class_name,
+            call_back_manager: ReactionCallbackManager):
+        emoji, role_id, menu_serial_id = inst.get_all(
+            'MENU_ENTRY',
+            args=['emoji', 'role_id', 'role_menu_id'],
+            entry_name=class_name)[0]
+
+        message_id, menu_name = inst.get_all(
+            'ROLE_MENU',
+            args=['message_id', 'menu_group_name'],
+            role_menu_id=menu_serial_id
+        )[0]
+
+        channel_id, guild_id = inst.get_all(
+            'ROLE_MENU_GROUP',
+            args=['channel_id', 'guild_id'],
+            group_name=menu_name
+        )[0]
+
+        channel: interactions.Channel = await interactions.get(self.bot, interactions.Channel, object_id=channel_id)
+        message: interactions.Message = await channel.get_message(message_id)
+
+        bot_id = self.bot.me.id
+
+        add_role_callback, remove_role_callback = self._create_add_remove_callback(guild_id, role_id)
+        call_back_manager.add_reaction_emoji_callback(message_id, emoji, add_role_callback, remove_role_callback)
+        await message.create_reaction(await create_managed_emote(emoji, guild_id, channel))
+
     async def load_menu(
             self,
             menu_name: str,
@@ -249,40 +318,8 @@ class ClassMenu:
                     emoji: interactions.Emoji = \
                         await create_managed_emote(emoji, guild, log_channel, existing_msg=emoji_msg)
                     print(f'role id: {role_id}, {emoji}')
-
-                    def add_role(role_id):
-                        async def func(reaction: interactions.MessageReaction):
-                            if reaction.user_id == bot_id:
-                                return
-                            print(f"detected, adding role {role_id}")
-                            # user = await interactions.get(self.bot, interactions.User, object_id=int(
-                            # reaction.user_id))
-                            await reaction.member.add_role(role_id, guild_id, reason="on react add")
-
-                        return func
-
-                    def remove_role(role_id):
-                        async def func(reaction: interactions.MessageReaction):
-                            if reaction.user_id == bot_id:
-                                return
-                            print(f"detected, removing role {role_id}")
-                            try:
-                                guild: interactions.Guild = \
-                                    await interactions.get(self.bot, interactions.Guild,
-                                                           object_id=int(reaction.guild_id))
-                                member = await guild.get_member(reaction.user_id)
-                                await member.remove_role(role_id, guild_id, reason="on react remove")
-                            except Exception as e:
-                                print("member removed reaction from role menu, rare occurrence, "
-                                      "this is not a cause for concern, read the error message to determine")
-                                print(str(e))
-                                print(f"member removed emoji {reaction.emoji}, "
-                                      f"however does not have the role")
-
-                        return func
-
-                    callbackManager.add_reaction_emoji_callback(msg_id, emoji, add_role(role_id), remove_role(role_id))
+                    add_callback, remove_callback = self._create_add_remove_callback(guild_id, role_id)
+                    callbackManager.add_reaction_emoji_callback(msg_id, emoji, add_callback, remove_callback)
                     await msg.create_reaction(emoji)
-                    # print(entry_name, role_id, emoji)
-            # pprint.pprint(callbackManager.emoji_callbacks)
+
             await emoji_msg.delete("testing emoji message not released")

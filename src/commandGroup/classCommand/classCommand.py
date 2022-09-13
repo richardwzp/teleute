@@ -18,20 +18,6 @@ class _ClassCommand:
         self.db = db
         self.callback = callback
 
-    @interactions.extension_command(
-        name="create_class_resource",
-        description="create a category, related channels, and related roles",
-        scope=gl_private_guild_id,
-        default_member_permissions=interactions.Permissions.ADMINISTRATOR,
-        options=[
-            interactions.Option(
-                name="class_name",
-                description="the class name formatted like CS2500",
-                type=interactions.OptionType.STRING,
-                required=True,
-            ),
-        ],
-    )
     async def create_class_resource(self, ctx: interactions.CommandContext, class_name: str):
         await ChannelUtil(ctx).createClass(class_name.upper())
         # await ctx.send(f"all creation done for class '{class_name.upper()}'")
@@ -72,8 +58,10 @@ class _ClassCommand:
         with self.db.get_instance() as inst:
             inst.add_class(class_name, full_name, description, school)
 
-        await MutableMessage(ctx, initial_message="+ created class successfully."). \
-            surround_default_codeBlock(lang="diff").send()
+        msg = MutableMessage(ctx, initial_message="+ created class successfully."). \
+            surround_default_codeBlock(lang="diff")
+        await msg.send()
+
         await self.create_class_resource(ctx, class_name)
 
     @interactions.extension_command(
@@ -97,6 +85,25 @@ class _ClassCommand:
                 await roleMsg.send()
         await ctx.send("all role deletion finished")
 
+    @interactions.extension_command(
+        name="classmate_count",
+        description="count how many classmates are taking the current class",
+        scope=gl_private_guild_id,
+        options=[
+            interactions.Option(
+                name="role",
+                description="the role associated with the class",
+                type=interactions.OptionType.ROLE,
+                required=True,
+            )
+        ]
+    )
+    async def classmate_count(self, ctx: interactions.CommandContext, role: interactions.Role):
+        if not re.match(r"^[a-zA-Z]+\d{4}$", role.name):
+            return await ctx.send("given role is not a class")
+        guild: interactions.Guild = await ctx.get_guild()
+        members = [0 for mem in await guild.get_all_members() if role.id in mem.roles]
+        return await ctx.send(f"class `{role.name}` has {len(members)} people")
 
 class ClassCommand(_ClassCommand, interactions.Extension):
     def __init__(self, client, db: PostgresQLDatabase, callback: ReactionCallbackManager):
