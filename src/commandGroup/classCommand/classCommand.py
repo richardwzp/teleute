@@ -99,6 +99,7 @@ class _ClassCommand:
         ]
     )
     async def classmate_count(self, ctx: interactions.CommandContext, role: interactions.Role):
+        await ctx.defer(False)
         if not re.match(r"^[a-zA-Z]+\d{4}$", role.name):
             return await ctx.send("given role is not a class")
         guild: interactions.Guild = await ctx.get_guild()
