@@ -1,9 +1,11 @@
 import json
+import re
 from typing import Dict
 
 import interactions
 
 from src.channelManage.channelUtil import ChannelUtil
+from src.commandGroup.classCommand.classCommand import _ClassCommand
 from src.databasectl.dataRead import readPreset
 from src.databasectl.postgres import PostgresQLDatabase
 from src.menu.classMenu import ClassMenu
@@ -100,6 +102,50 @@ class _MenuCommand:
         await menu.generate_menu_from_group(
             'Fall 2022 classes', await ctx.get_channel(), names, roles, emojis, menu_type='class', item_limit=10)
 
+    # @interactions.extension_command(
+    #     name="add_menu_entry",
+    #     description="load the menu",
+    #     scope=gl_private_guild_id,
+    #     default_member_permissions=interactions.Permissions.ADMINISTRATOR,
+    #     options=[
+    #         interactions.Option(
+    #             name="menu_name",
+    #             description="the name of the menu",
+    #             type=interactions.OptionType.STRING,
+    #             required=True,
+    #         ),
+    #         interactions.Option(
+    #             name="name",
+    #             description="the name to be linked to the react",
+    #             type=interactions.OptionType.STRING,
+    #             required=True,
+    #         ),
+    #         interactions.Option(
+    #             name="emoji",
+    #             description="emoji to be used",
+    #             type=interactions.OptionType.STRING,
+    #             required=True,
+    #         ),
+    #         interactions.Option(
+    #             name="role",
+    #             description="the role associated",
+    #             type=interactions.OptionType.ROLE,
+    #             required=True,
+    #         ),
+    #     ],
+    # )
+    async def add_menu_entry(self, ctx: interactions.CommandContext, menu_name, name, emoji, role: interactions.Role):
+        with self.db.get_instance() as inst:
+            msgBuilder = MutableMessage(
+                ctx, initial_message="adding menu entries...\n").surround_default_codeBlock(lang="diff")
+            await msgBuilder.send()
+            menu = ClassMenu(self.bot, self.db, ctx)
+            await menu.add_menu_entry(inst, menu_name, name, emoji, role, self.callback)
+            await msgBuilder.add_text("+ adding finished\n").send()
+            await msgBuilder.add_text("reloading all reactions...\n").send()
+            await menu.load_class(inst, name, self.callback)
+            await msgBuilder.ctxMsg.delete()
+
     @interactions.extension_command(
         name="add_menu_entry",
         description="load the menu",
@@ -113,8 +159,20 @@ class _MenuCommand:
                 required=True,
             ),
             interactions.Option(
-                name="name",
-                description="the name to be linked to the react",
+                name="class_name",
+                description="the class name formatted like CS2500",
+                type=interactions.OptionType.STRING,
+                required=True,
+            ),
+            interactions.Option(
+                name="full_name",
+                description="the full name of the class",
+                type=interactions.OptionType.STRING,
+                required=True,
+            ),
+            interactions.Option(
+                name="school",
+                description="the school name",
                 type=interactions.OptionType.STRING,
                 required=True,
             ),
@@ -125,24 +183,43 @@ class _MenuCommand:
                 required=True,
             ),
             interactions.Option(
-                name="role",
-                description="the role associated",
-                type=interactions.OptionType.ROLE,
-                required=True,
+                name="description",
+                description="the description of the class",
+                type=interactions.OptionType.STRING,
+                required=False,
             ),
         ],
     )
-    async def add_menu_entry(self, ctx: interactions.CommandContext, menu_name, name, emoji, role: interactions.Role):
+    async def add_class_to_menu(
+            self,
+            ctx: interactions.CommandContext,
+            menu_name,
+            class_name,
+            full_name,
+            school,
+            emoji,
+            description=""):
+        class_name = class_name.upper()
+        if not re.match(r"^[a-zA-Z]+\d{4}$", class_name):
+            return await ctx.send(f"class name '{class_name}' is not valid")
+
         with self.db.get_instance() as inst:
-            msgBuilder = MutableMessage(
-                ctx, initial_message="adding menu entries...\n").surround_default_codeBlock(lang="diff")
-            await msgBuilder.send()
+            inst.add_class(class_name, full_name, description, school)
+
+            msg = MutableMessage(ctx, initial_message="+ created class successfully."). \
+                surround_default_codeBlock(lang="diff")
+            await msg.send()
+
+            role, _ = await ChannelUtil(ctx).createClass(class_name.upper(), leave_no_trace=True)
+            msg.add_text("adding menu entries...\n")
+            await msg.send()
+
             menu = ClassMenu(self.bot, self.db, ctx)
-            await menu.add_menu_entry(inst, menu_name, name, emoji, role, self.callback)
-            await msgBuilder.add_text("+ adding finished\n").send()
-            await msgBuilder.add_text("reloading all reactions...\n").send()
-            await menu.load_class(inst, name, self.callback)
-            await msgBuilder.ctxMsg.delete()
+            await menu.add_menu_entry(inst, menu_name, class_name, emoji, role, self.callback)
+            await msg.add_text("+ adding finished\n").send()
+            await msg.add_text("loading reaction...\n").send()
+            await menu.load_class(inst, class_name, self.callback)
+            await msg.ctxMsg.delete()
 
     @interactions.extension_command(
         name="loading_menu",

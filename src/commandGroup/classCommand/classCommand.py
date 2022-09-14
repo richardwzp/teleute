@@ -22,38 +22,38 @@ class _ClassCommand:
         await ChannelUtil(ctx).createClass(class_name.upper())
         # await ctx.send(f"all creation done for class '{class_name.upper()}'")
 
-    @interactions.extension_command(
-        name="create_class",
-        description="create a category, generate related channels, persist the data, and create roles",
-        scope=gl_private_guild_id,
-        default_member_permissions=interactions.Permissions.ADMINISTRATOR,
-        options=[
-            interactions.Option(
-                name="class_name",
-                description="the class name formatted like CS2500",
-                type=interactions.OptionType.STRING,
-                required=True,
-            ),
-            interactions.Option(
-                name="full_name",
-                description="the full name of the class",
-                type=interactions.OptionType.STRING,
-                required=True,
-            ),
-            interactions.Option(
-                name="school",
-                description="the school name",
-                type=interactions.OptionType.STRING,
-                required=True,
-            ),
-            interactions.Option(
-                name="description",
-                description="the description of the class",
-                type=interactions.OptionType.STRING,
-                required=False,
-            ),
-        ],
-    )
+    # @interactions.extension_command(
+    #     name="create_class",
+    #     description="create a category, generate related channels, persist the data, and create roles",
+    #     scope=gl_private_guild_id,
+    #     default_member_permissions=interactions.Permissions.ADMINISTRATOR,
+    #     options=[
+    #         interactions.Option(
+    #             name="class_name",
+    #             description="the class name formatted like CS2500",
+    #             type=interactions.OptionType.STRING,
+    #             required=True,
+    #         ),
+    #         interactions.Option(
+    #             name="full_name",
+    #             description="the full name of the class",
+    #             type=interactions.OptionType.STRING,
+    #             required=True,
+    #         ),
+    #         interactions.Option(
+    #             name="school",
+    #             description="the school name",
+    #             type=interactions.OptionType.STRING,
+    #             required=True,
+    #         ),
+    #         interactions.Option(
+    #             name="description",
+    #             description="the description of the class",
+    #             type=interactions.OptionType.STRING,
+    #             required=False,
+    #         ),
+    #     ],
+    # )
     async def create_class(self, ctx: interactions.CommandContext, class_name: str, full_name, school, description=""):
         with self.db.get_instance() as inst:
             inst.add_class(class_name, full_name, description, school)

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import interactions
 import random
 
@@ -71,7 +73,7 @@ class ChannelUtil:
         role = await guild.create_role(cls_name, color=color)
         return role, color
 
-    async def createClass(self, cls_name: str):
+    async def createClass(self, cls_name: str, leave_no_trace=False) -> Tuple[interactions.Role, interactions.Role]:
         recordMsg = MutableMessage(self.ctx).surround_default_codeBlock("diff")
         await recordMsg.add_text(f"Creating class {cls_name}:\n").send()
         guild = await self.ctx.get_guild()
@@ -113,3 +115,6 @@ class ChannelUtil:
         await recordMsg.add_text(f"+ created voice channel 'study group 2'\n").send()
 
         await recordMsg.add_text(f"@ creation done @").send()
+        if leave_no_trace:
+            await recordMsg.ctxMsg.delete(reason="deleting construction message")
+        return role, ta_role
