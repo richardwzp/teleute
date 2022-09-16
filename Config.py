@@ -1,10 +1,22 @@
 import os
 import json
 from pprint import pprint
+from typing import List
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SERVER_SETTING_PATH = os.path.join(ROOT_DIR, 'server_setting.json')
 PRESET_PATH = os.path.join(ROOT_DIR, 'preset.json')
+
+
+def get_path_from_src(paths: List[str]):
+    """
+    A path start in src, not including src.
+
+    :param paths: the path specification, with src being the root directory
+    :return: the full qualified path
+    """
+    return os.path.join(ROOT_DIR, 'src', *paths)
+
 
 def get_server_id():
     with open(SERVER_SETTING_PATH) as f:
@@ -28,6 +40,7 @@ def get_fall_2021():
                 "description": description
             })
     return res
+
 
 if __name__ == '__main__':
     pprint(get_fall_2021())

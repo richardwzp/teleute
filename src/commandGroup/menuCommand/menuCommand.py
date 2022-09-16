@@ -5,8 +5,6 @@ from typing import Dict
 import interactions
 
 from src.channelManage.channelUtil import ChannelUtil
-from src.commandGroup.classCommand.classCommand import _ClassCommand
-from src.databasectl.dataRead import readPreset
 from src.databasectl.postgres import PostgresQLDatabase
 from src.menu.classMenu import ClassMenu
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
