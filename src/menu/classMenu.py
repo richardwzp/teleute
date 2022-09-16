@@ -302,7 +302,7 @@ class ClassMenu:
                 menu_group_name=menu_name
             )
             print(f'starting load, sending a message to log channel for emoji...')
-            emoji_msg = await log_channel.send("testing emojis ...")
+            emoji_msg = await log_channel.send("loading menu testing emojis ...")
             print(f'message sent, now go forward')
             bot_id = self.bot.me.id
             for menu_id, msg_id in menus:
