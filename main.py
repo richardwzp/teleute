@@ -11,6 +11,7 @@ from src.databasectl.postgres import PostgresQLDatabase, PostgresCursor
 from src.menu.classMenu import ClassMenu
 from src.menu.menuUtil import get_all_menu
 from src.reactionCallback.reactionCallbackManager import ReactionCallbackManager
+from src.util.presence import PresenceManager
 
 cfg = configparser.ConfigParser()
 cfg.read('secret.cfg')
@@ -52,19 +53,28 @@ async def on_raw_message_reaction_remove(reaction: interactions.MessageReaction)
     print('happened', member)
     await callback_manager.process_remove_reaction(reaction)
 
-
+_ready_once = True
 @bot.event
 async def on_ready():
-    s = deploy_status
-    print(f"-- sandman is ready ---")
-    print(f"--       {s}        ---")
-    with db.get_instance() as inst:
-        menu_groups = get_all_menu(inst)
-        for group_name, channel_id, menu_type, description, guild_id in menu_groups:
-            print(f"fetching channel '{channel_id}'")
-            channel = await interactions.get(bot, interactions.Channel, object_id=channel_id)
-            # TODO: ctx is not needed here. This is a hack, ClassMenu should not depend on context
-            await ClassMenu(bot, db, None).load_menu(group_name, channel, int(guild_id), callback_manager)
+    global _ready_once
+    if _ready_once:
+        _ready_once = False
+        s = deploy_status
+        print(f"-- sandman is ready ---")
+        print(f"--       {s}        ---")
+        with db.get_instance() as inst:
+            menu_groups = get_all_menu(inst)
+            for group_name, channel_id, menu_type, description, guild_id in menu_groups:
+                print(f"fetching channel '{channel_id}'")
+                channel = await interactions.get(bot, interactions.Channel, object_id=channel_id)
+                # TODO: ctx is not needed here. This is a hack, ClassMenu should not depend on context
+                await ClassMenu(bot, db, None).load_menu(group_name, channel, int(guild_id), callback_manager)
+
+
+@bot.event
+async def on_start():
+    await PresenceManager(bot, db).change_presence()
+    print('presence has been updated')
 
 
 try:
